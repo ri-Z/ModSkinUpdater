@@ -1,19 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ChaseLabs.CLUpdate;
 using System.Windows.Threading;
+using System.IO;
 
 namespace ModSkinUpdater
 {
@@ -50,15 +40,73 @@ namespace ModSkinUpdater
             {
                 dispatcher.Invoke(() => 
                 {
-                    status.Content = "Checking for Updates";
+                    status.Content = "Checking for Updates...";
                 }, DispatcherPriority.Normal);
 
                 string url = GetDownloadLink();
                 //Console.WriteLine(value: url);
 
-                string update_path = "C:/Users/r i Z/Desktop/LEAGUESKIN_10.21";
+                //string update_path = @"C:\Users\riZ\Desktop\MOD_LOL\update";
+                //string application_path = @"C:\Users\riZ\Desktop\MOD_LOL\";
+                string update_path = Directory.GetParent(Environment.CurrentDirectory).ToString() + "\\update";
+                string application_path = Directory.GetParent(Environment.CurrentDirectory).ToString();
 
-                //var update = Updater.Init(url, update_path, update_path);
+                var update = Updater.Init(url, update_path, application_path, null, false);
+
+                //UpdateManager.Update(null, null, null, url, update_path, application_path, null, false);
+
+                //if (UpdateManager.CheckForUpdate())
+                //{
+
+                //}
+
+                string[] files = Directory.GetFiles(Directory.GetParent(Environment.CurrentDirectory).ToString());
+                if (files != null)
+                {
+                    foreach (string file in files)
+                    {
+                        File.Delete(file);
+                        Console.WriteLine($"{file} is deleted.");
+                    }
+                }
+                
+
+                update.Download();
+                dispatcher.Invoke(() =>
+                {
+                    status.Content = "Downloading Update...";
+                }, DispatcherPriority.Normal);
+
+                update.Unzip();
+                dispatcher.Invoke(() =>
+                {
+                    status.Content = "Unziping Update...";
+                }, DispatcherPriority.Normal);
+
+                update.CleanUp();
+                dispatcher.Invoke(() =>
+                {
+                    status.Content = "Finishing Up...";
+                }, DispatcherPriority.Normal);
+
+                System.Threading.Thread.Sleep(1000);
+                Environment.Exit(0);
+                //using (var client = new System.Net.WebClient())
+                //{
+                //    client.DownloadFile(url, @"C:\Users\riZ\Desktop\MOD_LOL\mod.zip");
+
+                //    dispatcher.Invoke(() =>
+                //    {
+                //        status.Content = "Downloading Update...";
+                //    }, DispatcherPriority.Normal);
+
+                //    client.Dispose();
+
+                //    dispatcher.Invoke(() =>
+                //    {
+                //        status.Content = "Finishing Up...";
+                //    }, DispatcherPriority.Normal);
+                //}
             });
         }
     }
